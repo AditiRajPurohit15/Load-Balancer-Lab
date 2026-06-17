@@ -6,10 +6,8 @@ const PORT = 8001;
 
 app.get("/", (req, res) => {
     // res.status(200).send("Hello from Server 1");
-    res.set(
-        "x-server-name",
-        "aditi"
-    )
+    
+    res.set("x-server-name","server1")
     res.send("Hello from Server 1 UPDATED")
 });
 

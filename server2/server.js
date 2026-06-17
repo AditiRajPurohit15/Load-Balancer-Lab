@@ -5,7 +5,8 @@ const app = express();
 const PORT = 8002;
 
 app.get("/", (req, res) => {
-    res.send("Hello from Server 2");
+    res.set("x-server-name","server2");
+    res.send("Hello from Server2");
 });
 
 app.listen(PORT, () => {
