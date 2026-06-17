@@ -8,7 +8,8 @@ const targetServer ="http://localhost:8001"
 app.use(async(req, res) => {
 //    console.log(req.path);
 //    res.send("Gateway received request");
-    const options={
+    try {
+        const options={
         method: req.method,
         headers: req.headers
     }
@@ -18,8 +19,17 @@ app.use(async(req, res) => {
     const backendResponse = await fetch(targetServer + req.originalUrl, options)
     // console.log(backendResponse)
     res.status(backendResponse.status);
+    for(const [key,value] of backendResponse.headers){
+        res.set(key,value)
+    }
     const data = await backendResponse.text();
     res.send(data);
+    } catch (error) {
+        console.error(error);
+        return res.status(502).json({
+            message:"Bad Gateway"
+        })
+    }
 });
 
 app.listen(PORT, () => {
