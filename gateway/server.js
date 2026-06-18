@@ -5,9 +5,33 @@ app.use(express.json())
 const PORT = 5000;
 
 const servers = [
-    "http://localhost:8001",
-    "http://localhost:8002"
+    {
+        url: "http://localhost:8001",
+        healthy: true
+    },
+    {
+        url: "http://localhost:8002",
+        healthy: true
+    }
 ];
+
+setInterval(async()=>{
+for(const server of servers){
+    try {
+        await fetch(server.url)
+        server.healthy=true
+
+    } catch (error) {
+        server.healthy=false;
+    }
+    console.log(
+    server.url,
+    server.healthy
+);
+}
+},5000)
+
+
 
 let currentServer=0;
 
@@ -30,7 +54,17 @@ app.use(async(req, res) => {
     return res.status(404).send("Ignored");
 }
 
-        const targetServer = servers[currentServer % servers.length];
+const healthyServers =
+servers.filter(
+    server => server.healthy
+);
+
+        if(healthyServers.length===0){
+            return res.status(503).json({
+                message:"Service unavailable"
+            })
+        }
+        const targetServer = healthyServers[currentServer % healthyServers.length];
         currentServer++;
         
         console.log(req.originalUrl);
@@ -38,7 +72,7 @@ app.use(async(req, res) => {
 
     
 
-        const backendResponse = await fetch(targetServer + req.originalUrl, options)
+        const backendResponse = await fetch(targetServer.url + req.originalUrl, options)
         // console.log(backendResponse)
         res.status(backendResponse.status);
 
